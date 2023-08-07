@@ -1,0 +1,28 @@
+
+body {
+    margin: 0px;
+}
+
+@media screen and (orientation: portrait) {
+    main {
+        display: flex;
+        height: 100dvh;
+        justify-content: center;
+        flex-direction: column;
+    }
+    canvas {
+        width: 100dvw;
+        height: calc(100dvw * 6 / 8);
+    }
+}
+
+@media screen and (orientation: landscape) {
+    main {
+        display: flex;
+        justify-content: center;
+    }
+    canvas {
+        width: calc(100dvh * 8 / 6);
+        height: 100dvh;
+    }
+}
