@@ -9,49 +9,40 @@ let get_scene () = match !State.game_state with
   | OnPlaying -> (module Tennis : Scene)
   | GameOver -> (module Gameover : Scene)
 
-let update =
-  let open Global.In_canvas in
+let update () =
   let module M = (val get_scene ()) in
-  let+ _ = return () in
-  let init = if !State.init_required then (
-    State.init_required := false;
-    M.init()
-  ) else return () in
-  init >> M.update ()
+  if !State.init_required then begin
+    M.init ();
+    State.init_required := false
+  end;
+  M.update ()
 
-let clear ctx w h =
+let pre_render () =
+  let ctx = Global.context () in
+  let w, h = Global.canvas_size in
   let w, h = float_of_int w, float_of_int h in
   ctx##clearRect 0. 0. w h;
-  ()
-
-let render_bg ctx w h =
-  let w, h = float_of_int w, float_of_int h in
-  ctx##save;
   ctx##.fillStyle := Js.string "rgb(0, 0, 0)";
   ctx##fillRect 0. 0. w h;
-  ctx##restore;
   ()
 
-let render_body =
-  let open Global.In_canvas in
-  let* _ = return () in
+let render () =
   let module M = (val get_scene ()) in
-  if not !State.init_required
-  then M.render ()
-  else return ()
+  pre_render ();
+  if not !State.init_required then M.render ()
 
-let render =
-  let open Global.In_canvas in
-  let* ctx = use_context
-  and+ w, h = use_canvas_size in
-  (return @@ clear ctx w h)
-  >> (return @@ render_bg ctx w h)
-  >> render_body
-
-let frame = Global.In_canvas.(update >> render) 
+let frame _ =
+  update ();
+  render ()
 
 let start _ =
-  Global.In_canvas.run "canvas-main" frame;
+  let canvas = Global.canvas () in
+  let w, h = Global.canvas_size in
+  canvas##.width := w;
+  canvas##.height := h;
+  Dom_html.addEventListener canvas (Dom_html.Event.mousemove) (Mousemove.handler) Js._false |> ignore;
+  Dom_html.addEventListener canvas (Dom_html.Event.mouseup) (Mouseup.handler) Js._false |> ignore;
+  ignore @@ Dom_html.window##setInterval (Js.wrap_callback frame) 15.;
   Js._false
 
 let () = Dom_html.window##.onload := Dom_html.handler start

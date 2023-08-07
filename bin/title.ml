@@ -1,5 +1,4 @@
 open Js_of_ocaml
-open Global
 
 let render_title (ctx: Dom_html.canvasRenderingContext2D Js.t) cw ch =
   ctx##save;
@@ -24,22 +23,17 @@ let render_message (ctx: Dom_html.canvasRenderingContext2D Js.t) cw ch =
   ()
 
 let render () =
-  let open In_canvas in
-  let+ ctx = use_context
-  and+ (w, h) = use_canvas_size in
-  print_endline "render at title";
+  let ctx = Global.context () in
+  let (w, h) = Global.canvas_size in
   let cw, ch = float_of_int w, float_of_int h in
   render_title ctx cw ch;
   render_message ctx cw ch;
   ()
 
-let update () =
-  let open In_canvas in
-  return ()
+let update () = ()
 
 let init () =
-  let open In_canvas in
-  return @@ Mouseup.update_handler (fun _ ->
+  Mouseup.update_handler (fun _ ->
     Audio.resume () |> ignore;
     Audio.play ~loop:true "./audio/test.mp3";
     State.start Prologue;
