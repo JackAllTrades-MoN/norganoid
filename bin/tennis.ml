@@ -50,4 +50,17 @@ let init () =
   Mousemove.update_handler (fun e ->
     let (_, y) = !bar.position in
     bar := Bar.update_position (float_of_int e##.offsetX) y !bar
+  );
+  Touchmove.update_handler (fun e ->
+    let canvas = Global.canvas () in
+    let (_, y) = !bar.position in
+    let actual_w = canvas##.offsetWidth in
+    let logical_w = canvas##.width in
+    print_endline @@ Printf.sprintf "actual_w: %d, logical_w: %d" actual_w logical_w;
+    let a = float_of_int logical_w /. float_of_int actual_w in
+    let actual_offset = canvas##getBoundingClientRect##.left |> int_of_float in
+    let actual_x = (e##.changedTouches##item 0 |> Js.Optdef.to_option |> Option.get)##.clientX - actual_offset in
+    let logical_x = (float_of_int actual_x) *. a in
+    print_endline @@ Printf.sprintf "actual: %d, logical: %f" actual_x logical_x;
+    bar := Bar.update_position logical_x y !bar
   )

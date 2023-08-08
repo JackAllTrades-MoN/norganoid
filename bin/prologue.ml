@@ -29,5 +29,6 @@ let init () =
     let childhood = Sprite.add_frame childhood ((0., 0.), (512., 512.)) in
     Hashtbl.add sprites "childhood" childhood;
     Mouseup.update_handler (fun _ -> next ctx ());
+    Touchend.update_handler (fun _ -> next ctx ());
     next ctx ()
   )

@@ -42,8 +42,11 @@ let start _ =
   let w, h = Global.canvas_size in
   canvas##.width := w;
   canvas##.height := h;
-  Dom_html.addEventListener canvas (Dom_html.Event.mousemove) (Mousemove.handler) Js._false |> ignore;
-  Dom_html.addEventListener canvas (Dom_html.Event.mouseup) (Mouseup.handler) Js._false |> ignore;
+  Dom_html.addEventListener canvas (Dom_html.Event.mousemove) Mousemove.handler Js._false |> ignore;
+  Dom_html.addEventListener canvas (Dom_html.Event.mouseup) Mouseup.handler Js._false |> ignore;
+  Dom_html.addEventListener canvas (Dom_html.Event.touchstart) Touchstart.handler Js._false |> ignore;
+  Dom_html.addEventListener canvas (Dom_html.Event.touchmove) Touchmove.handler Js._false |> ignore;
+  Dom_html.addEventListener canvas (Dom_html.Event.touchend) Touchend.handler Js._false |> ignore;
   ignore @@ Dom_html.window##setInterval (Js.wrap_callback frame) 15.;
   Js._false
 
