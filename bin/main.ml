@@ -17,8 +17,7 @@ let update () =
   end;
   M.update ()
 
-let pre_render () =
-  let ctx = Global.context () in
+let pre_render ctx =
   let w, h = Global.canvas_size in
   let w, h = float_of_int w, float_of_int h in
   ctx##clearRect 0. 0. w h;
@@ -27,9 +26,12 @@ let pre_render () =
   ()
 
 let render () =
+  let ctx = Global.context () in
   let module M = (val get_scene ()) in
-  pre_render ();
-  if not !State.init_required then M.render ()
+  pre_render ctx;
+  ctx##save;
+  if not !State.init_required then M.render ();
+  ctx##restore
 
 let frame _ =
   update ();

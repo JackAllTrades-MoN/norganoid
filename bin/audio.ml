@@ -36,3 +36,21 @@ let play ?(loop = false) name =
 let pause name =
   let audio, _ = Hashtbl.find sources name in
   audio##pause
+
+module Rader = struct
+  let default_hz = 440.
+
+  let oscillator =
+    let o = audio_context##createOscillator in
+    o##._type := Js.string "sine";
+    o##.frequency##setValueAtTime default_hz audio_context##.currentTime;
+    o##connect (audio_context##.destination :> audioNode Js.t);
+    o
+
+  let play () = oscillator##start
+
+  let stop () = oscillator##stop
+
+  let set_freq hz =
+    oscillator##.frequency##setValueAtTime hz audio_context##.currentTime
+end

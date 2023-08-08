@@ -11,13 +11,16 @@ let render () =
 
 let update () = ()
 
-let next ctx () =
+let rec next ctx () =
   match Story.next () with
   | Nop ->
     Audio.pause "./audio/test.mp3";
     State.start OnPlaying;
   | UpdateText line -> Dialog.update ctx line 800.
-  | UpdateImage name -> Bgimg.update name
+  | UpdateImage name -> begin
+      Bgimg.update name;
+      next ctx ()
+    end
 
 let init () =
   let ctx = Global.context () in

@@ -1,7 +1,9 @@
 open Js_of_ocaml
 
+let clock = ref 0
+let show_msg = ref true
+
 let render_title (ctx: Dom_html.canvasRenderingContext2D Js.t) cw ch =
-  ctx##save;
   ctx##.fillStyle := Js.string "rgb(255, 255, 255)";
   ctx##.font := Js.string "80px Roboto medium";
   ctx##.textBaseline := Js.string "top";
@@ -9,17 +11,14 @@ let render_title (ctx: Dom_html.canvasRenderingContext2D Js.t) cw ch =
   let x = (cw -. metrics##.width) /. 2. in
   let y = (ch -. 80.) /. 2. in
   ctx##fillText (Js.string "NORGANOID" ) x y;
-  ctx##restore;
   ()
 
 let render_message (ctx: Dom_html.canvasRenderingContext2D Js.t) cw ch =
-  ctx##save;
   ctx##.font := Js.string "25px Roboto medium";
   let metrics = ctx##measureText (Js.string "click to play" ) in
   let x = (cw -. metrics##.width) /. 2. in
   let y = (ch -. 80.) /. 2. +. 100. in
   ctx##fillText (Js.string "click to play") x y;
-  ctx##restore;
   ()
 
 let render () =
@@ -27,10 +26,12 @@ let render () =
   let (w, h) = Global.canvas_size in
   let cw, ch = float_of_int w, float_of_int h in
   render_title ctx cw ch;
-  render_message ctx cw ch;
+  if !show_msg then render_message ctx cw ch;
   ()
 
-let update () = ()
+let update () =
+  clock := (!clock + 1) mod Int.max_int;
+  if !clock mod 60 = 0 then show_msg := not !show_msg
 
 let init () =
   Mouseup.update_handler (fun _ ->
