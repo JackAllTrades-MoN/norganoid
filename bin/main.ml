@@ -18,6 +18,8 @@ let current_scene () =
     | OnPlaying -> (module Tennis.Make())
     | GameOver -> (module Gameover.Make())
     | Normalend -> (module Normalend.Make())
+    | Trueend -> (module Trueend.Make())
+    | Endcredit -> (module Endcredit.Make())
   ) in
   if Option.is_some next then begin
     scene_buf := next;

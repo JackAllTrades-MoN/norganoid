@@ -45,6 +45,10 @@ module Make(): SceneType = struct
 
   let end_game () =
     if !score < 100 then start_scene GameOver
+    else if !score > 200 then begin
+      Global.final_score := !score;
+      start_scene Trueend
+    end
     else start_scene Normalend
 
   let update () =

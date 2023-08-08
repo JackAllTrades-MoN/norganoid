@@ -15,3 +15,5 @@ let context =
   in inner
 
 let canvas_size = (800, 600)
+
+let final_score = ref 0

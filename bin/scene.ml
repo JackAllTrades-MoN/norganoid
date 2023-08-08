@@ -13,7 +13,10 @@ type scene_name =
   | OnPlaying
   | GameOver
   | Normalend
+  | Trueend
+  | Endcredit
 
 let next_scene = ref (Some Title)
 
 let start_scene name = next_scene := Some name
+
