@@ -11,23 +11,44 @@ type t = {
 
 type sprites = (String.t, t) Hashtbl.t
 
-let _load name k =
+let loaded_sprites = Hashtbl.create 10
+
+let load (name: string) path k =
   let img = Dom_html.createImg Dom_html.document in
-  img##.src := Js.string name;
-  img##.onload := Dom_html.handler (fun _ -> k img; Js._false)
+  img##.src := Js.string path;
+  img##.onload := Dom_html.handler (fun _ ->
+    let sprites = {img; frames=[||]; idx=(-1)} in
+    Hashtbl.add loaded_sprites name sprites;
+    k ();
+    Js._false
+  )
 
-let load name k = _load name (fun img -> k {img; frames=[||]; idx=(-1)})
+let add_frame name frame =
+  Hashtbl.find_opt loaded_sprites name
+  |> Option.iter (fun sprites ->
+    Hashtbl.remove loaded_sprites name;
+    Hashtbl.add loaded_sprites name {sprites with frames = Array.append sprites.frames [|frame|]}
+  )
 
-let add_frame t frame = {t with frames = Array.append t.frames [|frame|] }
+let set_idx name idx =
+  Hashtbl.find_opt loaded_sprites name
+  |> Option.iter (fun sprites ->
+    Hashtbl.remove loaded_sprites name;
+    Hashtbl.add loaded_sprites name {sprites with idx}
+  )
 
-let set_idx t idx = {t with idx}
+let next_idx name =
+  let sprites = Hashtbl.find loaded_sprites name in
+  (sprites.idx + 1) mod Array.length sprites.frames
 
-let next_idx t = (t.idx + 1) mod Array.length t.frames
+let render ctx name x y w h =
+  Hashtbl.find_opt loaded_sprites name
+  |> Option.iter (fun t ->
+    let (sx, sy), (sw, sh) = t.frames.(t.idx) in
+    ctx##drawImage_full t.img sx sy sw sh x y w h
+  )
 
-let render ctx t x y w h =
-  let (sx, sy), (sw, sh) = t.frames.(t.idx) in
-  ctx##drawImage_full t.img sx sy sw sh x y w h
-
-let size_of t =
+let size_of name =
+  let t = Hashtbl.find loaded_sprites name in
   let (_, size) = t.frames.(t.idx) in
   size
