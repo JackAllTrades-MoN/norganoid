@@ -1,56 +1,46 @@
 open Ext
 open Js_of_ocaml
 
-let _ = print_endline "audio"
-
-let audio_context =
-  print_endline "try to get audio context";
-  let audio_context = new%js audioContext in
-  print_endline "succeeded";
-  audio_context
-
-let sources = Hashtbl.create 10
+let audio_context = new%js audioContext
+let audios = Hashtbl.create 10
 
 let resume () = audio_context##resume
 
-let load_audio is_loop name cont =
+let load_audio ?(is_loop=true) (name: string) (path: string) cont =
   let e = Dom_html.(createAudio document) in
-  e##.src := Js.string name;
+  e##.src := Js.string path;
   e##.loop := Js.bool is_loop;
   Dom_html.addEventListener e Dom_html.Event.loadstart (Dom_html.handler (fun _ ->
     let source = audio_context##createMediaElementSource e in
-    cont (e, source);
+    source##connect (audio_context##.destination :> audioNode Js.t);
+    Hashtbl.add audios name (e, source);
+    cont ();
     Js._false
   )) Js._false |> ignore
 
-let play ?(loop = false) name =
-  match Hashtbl.find_opt sources name with
-    | None ->
-      load_audio loop name (fun (audio, source) ->
-        source##connect (audio_context##.destination :> audioNode Js.t) |> ignore;
-        Hashtbl.add sources name (audio, source);
-        audio##play)
-    | Some (audio, _) ->
-      audio##play
+let play_audio name =
+  let (audio, _) = Hashtbl.find audios name in
+  audio##play
 
-let pause name =
-  let audio, _ = Hashtbl.find sources name in
-  audio##pause
+let stop_audio () =
+  Hashtbl.iter (fun _ ((audio: Dom_html.audioElement Js.t), _) -> audio##pause; audio##.currentTime := 0.) audios
 
 module Rader = struct
   let default_hz = 440.
 
-  let oscillator =
-    let o = audio_context##createOscillator in
-    o##._type := Js.string "sine";
-    o##.frequency##setValueAtTime default_hz audio_context##.currentTime;
-    o##connect (audio_context##.destination :> audioNode Js.t);
-    o
+  module Make() = struct
+    let oscillator =
+      let o = audio_context##createOscillator in
+      o##._type := Js.string "sine";
+      o##.frequency##setValueAtTime default_hz audio_context##.currentTime;
+      o##connect (audio_context##.destination :> audioNode Js.t);
+      o
 
-  let play () = oscillator##start
+    let play () = oscillator##start
 
-  let stop () = oscillator##stop
+    let stop () = oscillator##stop
 
-  let set_freq hz =
-    oscillator##.frequency##setValueAtTime hz audio_context##.currentTime
+    let set_freq hz =
+      oscillator##.frequency##setValueAtTime hz audio_context##.currentTime
+  end
 end

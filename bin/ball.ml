@@ -1,7 +1,5 @@
 open Js_of_ocaml
 
-let _ = print_endline "ball"
-
 let pi = 4.0 *. atan 1.0;;
 
 type t = {

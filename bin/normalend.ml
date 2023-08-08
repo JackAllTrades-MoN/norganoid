@@ -6,13 +6,12 @@ module Make(): SceneType = struct
 
   let sprites = Hashtbl.create 10
 
-  let fetch = Story.(fetch prologue)
+  let fetch = Story.(fetch normal_end)
 
   let rec next ctx () =
     match fetch () with
     | Nop ->
-      Audio.stop_audio ();
-      start_scene OnPlaying
+      start_scene Title
     | UpdateText line -> Dialog.update ctx line 800.
     | UpdateImage name -> begin
         Bgimg.update name;
@@ -20,8 +19,6 @@ module Make(): SceneType = struct
       end
 
   let init =
-    print_endline "play";
-    Audio.play_audio "prologue";
     let ctx = Global.context () in
     Sprite.load "./img/childhood.jpg" (fun childhood ->
       let childhood = Sprite.set_idx childhood 0 in
@@ -41,5 +38,4 @@ module Make(): SceneType = struct
     ()
 
   let update () = ()
-
 end

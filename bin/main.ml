@@ -1,20 +1,32 @@
+open Scene
 open Js_of_ocaml
-open Interface
 
-let _high_score = ref 0
+let scene_buf: (module SceneType) option ref = ref None
 
-let get_scene () = match !State.game_state with
-  | Title -> (module Title: Scene)
-  | Prologue -> (module Prologue : Scene)
-  | OnPlaying -> (module Tennis : Scene)
-  | GameOver -> (module Gameover : Scene)
+let current_scene () =
+  if Option.is_some !next_scene then begin
+    Audio.stop_audio ();
+    Mousemove.update_handler (fun _ -> ());
+    Mouseup.update_handler (fun _ -> ());
+    Touchend.update_handler (fun _ -> ());
+    Touchmove.update_handler (fun _ -> ());
+    Touchstart.update_handler (fun _ -> ())
+  end;
+  let next = !next_scene |> Option.map (function
+    | Title -> (module Title.Make(): SceneType)
+    | Prologue -> (module Prologue.Make())
+    | OnPlaying -> (module Tennis.Make())
+    | GameOver -> (module Gameover.Make())
+    | Normalend -> (module Normalend.Make())
+  ) in
+  if Option.is_some next then begin
+    scene_buf := next;
+    next_scene := None;
+  end;
+  Option.get !scene_buf
 
 let update () =
-  let module M = (val get_scene ()) in
-  if !State.init_required then begin
-    M.init ();
-    State.init_required := false
-  end;
+  let module M = (val current_scene ()) in
   M.update ()
 
 let pre_render ctx =
@@ -27,10 +39,10 @@ let pre_render ctx =
 
 let render () =
   let ctx = Global.context () in
-  let module M = (val get_scene ()) in
+  let module M = (val current_scene ()) in
   pre_render ctx;
   ctx##save;
-  if not !State.init_required then M.render ();
+  M.render ();
   ctx##restore
 
 let frame _ =
@@ -47,7 +59,10 @@ let start _ =
   Dom_html.addEventListener canvas (Dom_html.Event.touchstart) Touchstart.handler Js._false |> ignore;
   Dom_html.addEventListener canvas (Dom_html.Event.touchmove) Touchmove.handler Js._false |> ignore;
   Dom_html.addEventListener canvas (Dom_html.Event.touchend) Touchend.handler Js._false |> ignore;
-  ignore @@ Dom_html.window##setInterval (Js.wrap_callback frame) 15.;
+  Audio.load_audio "prologue" "./audio/test.mp3" (fun _ ->
+  Audio.load_audio "noise" "./audio/noise.mp3" (fun _ ->
+    ignore @@ Dom_html.window##setInterval (Js.wrap_callback frame) 15.;
+  ));
   Js._false
 
 let () = Dom_html.window##.onload := Dom_html.handler start
