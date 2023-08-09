@@ -62,14 +62,23 @@ let start _ =
   Dom_html.addEventListener canvas (Dom_html.Event.touchstart) Touchstart.handler Js._false |> ignore;
   Dom_html.addEventListener canvas (Dom_html.Event.touchmove) Touchmove.handler Js._false |> ignore;
   Dom_html.addEventListener canvas (Dom_html.Event.touchend) Touchend.handler Js._false |> ignore;
-  Sprite.load "waft_logo" "./img/waft_logo.png" (fun _ ->
-  Sprite.set_idx "waft_logo" 0;
-  Sprite.add_frame "waft_logo" ((0., 0.), (242., 112.));
-  Sprite.load "childhood_blur" "./img/childhood_blur.jpg" (fun _ ->
-  Sprite.set_idx "childhood_blur" 0;
-  Sprite.add_frame "childhood_blur" ((0., 0.), (512., 512.));
+  Sprite.load
+    "waft_logo"
+    "./img/waft_logo.png"
+    ~frames:[|((0., 0.), (242., 112.))|] (fun _ ->
+  Sprite.load
+    "childhood_blur"
+    "./img/childhood_blur.jpg"
+    ~frames:[|((0., 0.), (512., 512.))|] (fun _ ->
+  Sprite.load
+      "myson"
+      "./img/boy.jpg"
+      ~frames:[|((0., 0.), (512., 512.))|] (fun _ ->
+  Sprite.load
+      "myson_blur"
+      "./img/boy_blur.jpg"
+      ~frames:[|(0., 0.), (512., 512.)|] (fun _ ->
   Sprite.load "noise" "./img/noise.png" (fun _ ->
-  Sprite.set_idx "noise" 0;
   for i=0 to 4 do
     let x = 800. *. float_of_int i in
     Sprite.add_frame "noise" ((x, 0.), (800., 600.))
@@ -77,7 +86,7 @@ let start _ =
   Audio.load_audio "prologue" "./audio/test.mp3" (fun _ ->
   Audio.load_audio "noise" "./audio/noise.mp3" (fun _ ->
     ignore @@ Dom_html.window##setInterval (Js.wrap_callback frame) 15.;
-  )))));
+  )))))));
   Js._false
 
 let () = Dom_html.window##.onload := Dom_html.handler start

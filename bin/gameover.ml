@@ -14,7 +14,7 @@ module Make(): SceneType = struct
     Sprite.render ctx "noise" 0. 0. w h
 
   let update () =
-    if !sec >= 5 then start_scene Title
+    if !sec >= 5 then start_scene OnPlaying
     else begin
       let i = Sprite.next_idx "noise" in
       Sprite.set_idx "noise" i;

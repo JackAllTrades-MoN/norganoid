@@ -4,13 +4,12 @@ open Scene
 module Make(): SceneType = struct
   module Rader = Audio.Rader.Make ()
   let score = ref 0
-  let balls = ref []
+  let ball = ref (Ball.gen 800. ())
   let bar = ref (Bar.create ())
   let ball_presented = ref true
 
   let init =
     Rader.play ();
-    balls := [(Ball.gen 800. ())];
     Mousemove.update_handler (fun e ->
       let (_, y) = !bar.position in
       bar := Bar.update_position (float_of_int e##.offsetX) y !bar
@@ -39,7 +38,7 @@ module Make(): SceneType = struct
   let render () =
     let ctx = Global.context () in
     Bar.render ctx !bar;
-    if !ball_presented then List.iter (fun ball -> Ball.render ctx ball) !balls;
+    if !ball_presented then Ball.render ctx !ball;
     render_score ctx;
     ()
 
@@ -51,29 +50,26 @@ module Make(): SceneType = struct
     end
     else start_scene Normalend
 
+  let in_bar = ref false
+
   let update () =
-    if List.exists Ball.(fun ball ->
-      let (_, by) = ball.position in
-      510. <= by
-    ) !balls then begin
+    if 510. <= Ball.(snd !ball.position) then begin
       Rader.stop ();
       end_game ()
-    end;
-    balls := List.map (fun ball ->
-      let ball = if Bar.is_hit ball !bar then begin
+    end else begin
+      if not !in_bar && Bar.is_hit !ball !bar then begin
+        in_bar := true;
         score := !score + 10;
-        Ball.reflect ball
-      end else ball in
-      Ball.update ball
-    ) !balls;
-    if !score > 50 then ball_presented := false;
-    (*if List.length !balls <= !score / 50 then
-      balls := (Ball.gen 800. ())::!balls;*)
-    let ball = List.hd !balls in
-    let x, _ = Ball.(ball.position) in
-    let bar_x, _ = Bar.(!bar.position) in
-    let d = x -. bar_x in
-    let nd = d /. 400. in
-    Rader.set_freq (440. +. nd *. 300.)
+        ball := Ball.reflect !ball
+      end;
+      if not (Bar.is_hit !ball !bar) then in_bar := false;
+      ball := Ball.update !ball;
+      if !score > 50 then ball_presented := false;
+      let x, _ = Ball.(!ball.position) in
+      let bar_x, _ = Bar.(!bar.position) in
+      let d = x -. bar_x in
+      let nd = d /. 400. in
+      Rader.set_freq (440. +. nd *. 300.)
+    end
 
 end

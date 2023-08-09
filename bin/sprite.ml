@@ -13,11 +13,11 @@ type sprites = (String.t, t) Hashtbl.t
 
 let loaded_sprites = Hashtbl.create 10
 
-let load (name: string) path k =
+let load  (name: string) path ?(idx=0) ?(frames=[||]) k =
   let img = Dom_html.createImg Dom_html.document in
   img##.src := Js.string path;
   img##.onload := Dom_html.handler (fun _ ->
-    let sprites = {img; frames=[||]; idx=(-1)} in
+    let sprites = {img; frames; idx} in
     Hashtbl.add loaded_sprites name sprites;
     k ();
     Js._false
