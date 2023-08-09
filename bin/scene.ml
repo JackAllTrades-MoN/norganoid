@@ -8,6 +8,7 @@ module type SceneType = sig
 end
 
 type scene_name =
+  | Logo
   | Title
   | Prologue
   | OnPlaying
@@ -16,7 +17,7 @@ type scene_name =
   | Trueend
   | Endcredit
 
-let next_scene = ref (Some Title)
+let next_scene = ref (Some Logo)
 
 let start_scene name = next_scene := Some name
 
