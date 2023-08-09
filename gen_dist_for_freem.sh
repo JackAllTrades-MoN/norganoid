@@ -78,3 +78,7 @@ BGM:
 https://nazology.net/archives/102025
 
 " > ./dist/ReadMe.txt
+
+pushd ./dist
+zip -r for_freem.zip css img js favicon.ico index.html ReadMe.txt
+popd
