@@ -2,11 +2,14 @@
 
 set -eu
 
+./build.sh
+
 rm -rf dist
 mkdir -p dist
 cp -r img dist
 cp -r css dist
 cp -r js dist
+cp -r audio dist
 cp index.html dist
 cp favicon.ico dist
 echo "ゲーム名 「NORGANOID」
@@ -80,5 +83,5 @@ https://nazology.net/archives/102025
 " > ./dist/ReadMe.txt
 
 pushd ./dist
-zip -r for_freem.zip css img js favicon.ico index.html ReadMe.txt
+zip -r for_freem.zip audio css img js favicon.ico index.html ReadMe.txt
 popd
