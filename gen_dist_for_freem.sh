@@ -10,10 +10,13 @@ cp -r img dist
 cp -r css dist
 cp -r js dist
 cp -r audio dist
+cp -r fonts dist
 cp index.html dist
 cp favicon.ico dist
 echo "ゲーム名 「NORGANOID」
 製作 WAFT
+
+プレイ時間: 5~10分程度
 
 ストーリー:
 家族に囲まれ、幸せな日々を過ごす主人公。
@@ -83,5 +86,5 @@ https://nazology.net/archives/102025
 " > ./dist/ReadMe.txt
 
 pushd ./dist
-zip -r for_freem.zip audio css img js favicon.ico index.html ReadMe.txt
+zip -r for_freem.zip fonts audio css img js favicon.ico index.html ReadMe.txt
 popd

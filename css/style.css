@@ -1,4 +1,9 @@
 
+@font-face {
+    font-family: Yomogi;
+    src: url('/fonts/Yomogi-Regular.ttf') format("truetype");
+ }
+
 body {
     margin: 0px;
 }
